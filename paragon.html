@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Paragon Calculator</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="bignumber.min.js"></script>
+    <script src="paragon.js"></script>
+    <script>
+        function CalculateParagon() {
+            $("#result").empty();
+            var current = $("#current").val();
+            var desired = $("#desired").val();
+            var xpHr = parseInt($("#xphr").val());
+            var hrsPerDay = parseInt($("#hrsperday").val());
+            var xpNeeded = DiffParagon(desired, current);
+            var hours = xpNeeded.dividedBy(BigNumber("1000000000").multipliedBy(BigNumber(xpHr)));
+            var days = hours.dividedBy(BigNumber(hrsPerDay));
+
+            $("#xpresult").val(xpNeeded.toFixed(0));
+            $("#hoursresult").val(hours.toFixed(1, 4));
+            $("#daysresult").val(days.toFixed(1, 4));
+        }
+
+        function HaveParagon() {
+            $("#current").bind('input', CalculateParagon);
+            $("#desired").bind('input', CalculateParagon);
+            $("#xphr").bind('input', CalculateParagon);
+            $("#hrsperday").bind('input', CalculateParagon);
+
+            $("#current").val("0");
+            $("#desired").val("2000");
+            $("#xphr").val("2000");
+            $("#hrsperday").val("8");
+            $("#maindiv").show();
+            CalculateParagon();
+        }
+
+        $(document).ready(function () {
+            LoadParagon(HaveParagon);
+        });
+    </script>
+</head>
+<body>
+    <div id="maindiv" hidden>
+        <table>
+            <tr><td colspan="2">How many days to reach goal?</td></tr>
+            <tr><td>Current paragon</td><td><input id="current" type="text" /></td></tr>
+            <tr><td>Desired paragon</td><td><input id="desired" type="text" /></td></tr>
+            <tr><td>Billion XP Per Hour</td><td><input id="xphr" type="text" /></td></tr>
+            <tr><td>Hours Per Day</td><td><input id="hrsperday" type="text" /></td></tr>
+            <tr><td colspan="2">--- RESULT ---</td></tr>
+            <tr><td>XP Needed</td><td><input id="xpresult" type="text" disabled /></td></tr>
+            <tr><td>Hours Needed</td><td><input id="hoursresult" type="text" disabled /></td></tr>
+            <tr><td>Days Needed</td><td><input id="daysresult" type="text" disabled /></td></tr>
+        </table>
+    </div>
+</body>
+</html>
