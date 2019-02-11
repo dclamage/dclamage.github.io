@@ -16,7 +16,7 @@
             var hours = xpNeeded.dividedBy(BigNumber("1000000000").multipliedBy(BigNumber(xpHr)));
             var days = hours.dividedBy(BigNumber(hrsPerDay));
 
-            $("#xpresult").val(xpNeeded.toFixed(0));
+            $("#xpresult").val(xpNeeded.dividedBy(BigNumber("1000000000")).toFixed(2));
             $("#hoursresult").val(hours.toFixed(1, 4));
             $("#daysresult").val(days.toFixed(1, 4));
         }
@@ -49,9 +49,9 @@
             <tr><td>Billion XP Per Hour</td><td><input id="xphr" type="text" /></td></tr>
             <tr><td>Hours Per Day</td><td><input id="hrsperday" type="text" /></td></tr>
             <tr><td colspan="2">--- RESULT ---</td></tr>
-            <tr><td>XP Needed</td><td><input id="xpresult" type="text" disabled /></td></tr>
-            <tr><td>Hours Needed</td><td><input id="hoursresult" type="text" disabled /></td></tr>
-            <tr><td>Days Needed</td><td><input id="daysresult" type="text" disabled /></td></tr>
+            <tr><td>Billion XP Needed</td><td><input id="xpresult" type="text" readonly /></td></tr>
+            <tr><td>Hours Needed</td><td><input id="hoursresult" type="text" readonly /></td></tr>
+            <tr><td>Days Needed</td><td><input id="daysresult" type="text" readonly /></td></tr>
         </table>
     </div>
 </body>
