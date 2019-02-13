@@ -2,23 +2,28 @@
 <html>
 <head>
     <title>Paragon Calculator</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/siwalikm/quick-form-css@2.2.2/qfc-dark.css">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="bignumber.min.js"></script>
-    <script src="paragon.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+    <script src="paragon1.1.js"></script>
     <script>
         function CalculateParagon() {
             $("#result").empty();
             var current = $("#current").val();
             var desired = $("#desired").val();
-            var xpHr = parseInt($("#xphr").val());
-            var hrsPerDay = parseInt($("#hrsperday").val());
+            var xpHr = BigNumber("1000000000").multipliedBy(BigNumber($("#xphr").val()));
+            var hrsPerDay = BigNumber($("#hrsperday").val());
             var xpNeeded = DiffParagon(desired, current);
-            var hours = xpNeeded.dividedBy(BigNumber("1000000000").multipliedBy(BigNumber(xpHr)));
-            var days = hours.dividedBy(BigNumber(hrsPerDay));
+            var hours = xpNeeded.dividedBy(xpHr);
+            var days = hours.dividedBy(hrsPerDay);
 
-            $("#xpresult").val(xpNeeded.dividedBy(BigNumber("1000000000")).toFixed(2));
+            $("#xpresult").val(xpNeeded.dividedBy(xpHr).toFixed(2));
             $("#hoursresult").val(hours.toFixed(1, 4));
             $("#daysresult").val(days.toFixed(1, 4));
+
+            UpdateChart(days.toNumber());
         }
 
         function HaveParagon() {
@@ -34,6 +39,69 @@
             $("#maindiv").show();
             CalculateParagon();
         }
+        var existingChart;
+        function UpdateChart(numDays) {
+            var days = []
+            var level = []
+            var curXP = BigNumber(paragons.paragon[parseInt($("#current").val())].total);
+            var xpHr = BigNumber("1000000000").multipliedBy(BigNumber($("#xphr").val()));
+            var hrsPerDay = BigNumber($("#hrsperday").val());
+            var xpDay = xpHr.multipliedBy(hrsPerDay);
+            for (var i = 0; i <= Math.ceil(numDays); i++) {
+                days.push(i)
+                level.push(GetParagonLevel(curXP))
+                curXP = curXP.plus(xpDay)
+            }
+
+            var ctx = $("#paragonChart");
+            if (existingChart) {
+                existingChart.destroy()
+            }
+            existingChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: 'Paragon Level',
+                        data: level,
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        fill: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    title: {
+                        display: true,
+                        text: 'Paragon Level Over Time'
+                    },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Day'
+                            }
+                        }],
+                        yAxes: [{
+                            display: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Paragon Level'
+                            }
+                        }]
+                    }
+                }
+            });
+        }
 
         $(document).ready(function () {
             LoadParagon(HaveParagon);
@@ -41,9 +109,9 @@
     </script>
 </head>
 <body>
-    <div id="maindiv" hidden>
+    <div id="maindiv" class="qfc-container" hidden>
+        <h3>How many days to reach goal?</h3>
         <table>
-            <tr><td colspan="2">How many days to reach goal?</td></tr>
             <tr><td>Current paragon</td><td><input id="current" type="text" /></td></tr>
             <tr><td>Desired paragon</td><td><input id="desired" type="text" /></td></tr>
             <tr><td>Billion XP Per Hour</td><td><input id="xphr" type="text" /></td></tr>
@@ -53,6 +121,8 @@
             <tr><td>Hours Needed</td><td><input id="hoursresult" type="text" readonly /></td></tr>
             <tr><td>Days Needed</td><td><input id="daysresult" type="text" readonly /></td></tr>
         </table>
+
+        <canvas id="paragonChart" width="400" height="400"></canvas>
     </div>
 </body>
 </html>
