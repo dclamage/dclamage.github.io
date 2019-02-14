@@ -7,8 +7,10 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="bignumber.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
-    <script src="paragon1.1.js"></script>
+    <script src="paragon1.2.js"></script>
     <script>
+        "use strict";
+
         function CalculateParagon() {
             $("#result").empty();
             var current = $("#current").val();
@@ -43,11 +45,17 @@
         function UpdateChart(numDays) {
             var days = []
             var level = []
-            var curXP = BigNumber(paragons.paragon[parseInt($("#current").val())].total);
+            var curXP = GetParagonLevelXP(parseInt($("#current").val()));
             var xpHr = BigNumber("1000000000").multipliedBy(BigNumber($("#xphr").val()));
             var hrsPerDay = BigNumber($("#hrsperday").val());
             var xpDay = xpHr.multipliedBy(hrsPerDay);
-            for (var i = 0; i <= Math.ceil(numDays); i++) {
+            if (xpDay.isLessThanOrEqualTo(BigNumber("0"))) {
+                return;
+            }
+            numDays = Math.ceil(numDays);
+            var increment = Math.max(1, Math.floor(numDays / 30) + 1)
+            xpDay = xpDay.multipliedBy(BigNumber(increment))
+            for (var i = 0; i <= numDays; i += increment) {
                 days.push(i)
                 level.push(GetParagonLevel(curXP))
                 curXP = curXP.plus(xpDay)
