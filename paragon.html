@@ -11,6 +11,22 @@
     <script>
         "use strict";
 
+        function CalculateParagonSum() {
+            var p1 = $("#p1").val();
+            var p2 = $("#p2").val();
+            if (p1 > 10000) {
+                p1 = 10000;
+                $("#p1").val(p1);
+            }
+            if (p2 > 10000) {
+                p2 = 10000;
+                $("#p1").val(p2);
+            }
+            var xpsum = BigNumber(GetParagonLevelXP(p1)).plus(BigNumber(GetParagonLevelXP(p2)));
+            var psum = GetParagonLevel(xpsum);
+            $("#psum").val(psum);
+        }
+
         function CalculateParagon() {
             $("#result").empty();
             var current = $("#current").val();
@@ -46,6 +62,12 @@
         }
 
         function HaveParagon() {
+            $("#p1").bind('input', CalculateParagonSum);
+            $("#p2").bind('input', CalculateParagonSum);
+            $("#p1").val("1000");
+            $("#p2").val("1000");
+            CalculateParagonSum();
+
             $("#current").bind('input', CalculateParagon);
             $("#desired").bind('input', CalculateParagon);
             $("#xphr").bind('input', CalculateParagon);
@@ -135,6 +157,17 @@
 </head>
 <body>
     <div id="maindiv" class="qfc-container" hidden>
+        <h3>Add two paragons</h3>
+        <table>
+            <tr>
+                <td><input id="p1" type="text" /></td>
+                <td width="100">+</td>
+                <td><input id="p2" type="text" /></td>
+                <td width="100">=</td="center">
+                <td><input id="psum" type="text" readonly /></td>
+            </tr>
+        </table>
+
         <h3>How many days to reach goal?</h3>
         <table>
             <tr><td>Current paragon</td><td><input id="current" type="text" /></td></tr>
