@@ -7,21 +7,13 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="bignumber.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
-    <script src="paragon1.2.js"></script>
+    <script src="paragon1.3.js"></script>
     <script>
         "use strict";
 
         function CalculateParagonSum() {
             var p1 = $("#p1").val();
             var p2 = $("#p2").val();
-            if (p1 > 10000) {
-                p1 = 10000;
-                $("#p1").val(p1);
-            }
-            if (p2 > 10000) {
-                p2 = 10000;
-                $("#p1").val(p2);
-            }
             var xpsum = BigNumber(GetParagonLevelXP(p1)).plus(BigNumber(GetParagonLevelXP(p2)));
             var psum = GetParagonLevel(xpsum);
             $("#psum").val(psum);
