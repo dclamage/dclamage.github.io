@@ -4,8 +4,7 @@ var paragons;
 function LoadParagon(onload) {
     $.getJSON("paragontotals.json", function (data) {
         paragons = [];
-        for (var i = 0; i < 2252; i++)
-        {
+        for (var i = 0; i < 2252; i++) {
             paragons.push(BigNumber(data[i]));
         }
         onload();
@@ -58,4 +57,24 @@ function GetParagonLevel(xp) {
         }
     }
     return l;
+}
+
+var baseRiftXP = BigNumber(11794543);
+var baseCloseXP = BigNumber(15667533);
+function ScaleXP(xp, level) {
+    if (level <= 25) {
+        return xp.multipliedBy(Math.pow(1.127, level - 1));
+    }
+    if (level <= 70) {
+        return xp.multipliedBy(Math.pow(1.127, 24) * Math.pow(1.08, level - 25));
+    }
+    return xp.multipliedBy(Math.pow(1.127, 24) * Math.pow(1.08, 70 - 25) * Math.pow(1.05, level - 70));
+}
+
+function GetRiftXP(level) {
+    return ScaleXP(baseRiftXP, level);
+}
+
+function GetCloseXP(level) {
+    return ScaleXP(baseCloseXP, level);
 }
