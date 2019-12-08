@@ -28,9 +28,11 @@
             var current = $("#current").val();
             var desired = $("#desired").val();
             var xpHrInput = $("#xphr").val();
+            var hrsPerDayInput = $("#hrsperday").val();
             localStorage.setItem("current", current);
             localStorage.setItem("desired", desired);
             localStorage.setItem("xphr", xpHrInput);
+            localStorage.setItem("hrsperday", hrsPerDayInput);
             var xpHr = BigNumber("1000000000").multipliedBy(BigNumber(xpHrInput));
             var hrsPerDay = BigNumber($("#hrsperday").val());
             var xpNeeded = DiffParagon(desired, current);
@@ -59,6 +61,22 @@
             $("#daysresult").val(days.toFixed(1, 4));
 
             UpdateChart(days.toNumber());
+        }
+
+        var billion = BigNumber('1000000000');
+        var million = BigNumber('1000000');
+        var thousand = BigNumber('1000');
+        function Human(val) {
+            if (val.isGreaterThan(billion)) {
+                return val.dividedBy(billion).toFixed(2, 4) + ' billion';
+            }
+            if (val.isGreaterThan(million)) {
+                return val.dividedBy(million).toFixed(2, 4) + ' million';
+            }
+            if (val.isGreaterThan(thousand)) {
+                return val.dividedBy(thousand).toFixed(2, 4) + ' thousand';
+            }
+            return val.toFixed(2, 4);
         }
 
         function CalculatePools() {
@@ -96,6 +114,13 @@
             var riftNumPools = riftPoolConsumed.dividedBy(poolXP);
             var closeNumPools = closePoolConsumed.dividedBy(poolXP);
             var totalNumPools = totalPoolConsumed.dividedBy(poolXP);
+            $("#baseriftxp").val(Human(riftXP));
+            $("#pooledriftxp").val(Human(riftXP.multipliedBy(1.25)));
+            $("#baseclosexp").val(Human(closeXP));
+            $("#pooledclosexp").val(Human(closeXP.multipliedBy(1.5625)));
+            $("#basetotalxp").val(Human(riftXP.plus(closeXP)));
+            $("#closepooledtotalxp").val(Human(riftXP.plus(closeXP.multipliedBy(1.5625))));
+            $("#allpooledtotalxp").val(Human(riftXP.multipliedBy(1.25).plus(closeXP.multipliedBy(1.5625))));
             $("#poolsresultrift").val(riftNumPools.toFixed(2, 4));
             $("#poolsresultclose").val(closeNumPools.toFixed(2, 4));
             $("#poolsresulttotal").val(totalNumPools.toFixed(2, 4));
@@ -124,7 +149,7 @@
             $("#current").val(GetLocalStorage("current", "0"));
             $("#desired").val(GetLocalStorage("desired", "2000"));
             $("#xphr").val(GetLocalStorage("xphr", "2000"));
-            $("#hrsperday").val("8");
+            $("#hrsperday").val(GetLocalStorage("hrsperday", "8"));
             $("#maindiv").show();
             CalculateParagon();
 
@@ -247,6 +272,7 @@
 
         <h3>Pools</h3>
         <table>
+            <tr><td colspan="2"><h6>--- Inputs ---</h6></td></tr>
             <tr>
                 <td>Current paragon</td>
                 <td><input id="poolsparagon" type="text" /></td>
@@ -264,7 +290,7 @@
                 <td><input id="poolsxpgear" type="text" /></td>
             </tr>
             <tr>
-                <td colspan="2">--- RESULT ---</td>
+                <td colspan="2"><h6>--- RESULT ---</h6></td>
             </tr>
             <tr>
                 <td>Pools For Rift</td>
@@ -277,6 +303,49 @@
             <tr>
                 <td>Total Pools</td>
                 <td><input id="poolsresulttotal" type="text" readonly /></td>
+            </tr>
+            <tr><td colspan="2"><h6>--- Raw XP Numbers ---</h6></td></tr>
+            <tr>
+                <td>Rift [Unpooled]</td>
+                <td>
+                    <input id="baseriftxp" type="text" readonly />
+                </td>
+            </tr>
+            <tr>
+                <td>Rift [Pooled]</td>
+                <td>
+                    <input id="pooledriftxp" type="text" readonly />
+                </td>
+            </tr>
+            <tr>
+                <td>Close XP [Unpooled]</td>
+                <td>
+                    <input id="baseclosexp" type="text" readonly />
+                </td>
+            </tr>
+            <tr>
+                <td>Close XP [Pooled]</td>
+                <td>
+                    <input id="pooledclosexp" type="text" readonly />
+                </td>
+            </tr>
+            <tr>
+                <td>Total XP [Unpooled]</td>
+                <td>
+                    <input id="basetotalxp" type="text" readonly /> (Base)
+                </td>
+            </tr>
+            <tr>
+                <td>Total XP [Close Pooled]</td>
+                <td>
+                    <input id="closepooledtotalxp" type="text" readonly /> (Only Close Pooled)
+                </td>
+            </tr>
+            <tr>
+                <td>Total XP [Fully Pooled]</td>
+                <td>
+                    <input id="allpooledtotalxp" type="text" readonly /> (Fully Pooled)
+                </td>
             </tr>
         </table>
 
