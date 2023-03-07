@@ -2,287 +2,103 @@
 <html>
 
 <head>
-	<!-- Global site tag (gtag.js) - Google Analytics -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-173057857-1"></script>
-	<script>
-	  window.dataLayer = window.dataLayer || [];
-	  function gtag(){dataLayer.push(arguments);}
-	  gtag('js', new Date());
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-173057857-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
 
-	  gtag('config', 'UA-173057857-1');
-	</script>
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-173057857-1');
+    </script>
 
     <title>Paragon Calculator</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/siwalikm/quick-form-css@2.2.2/qfc-dark.css">
+    <link rel="stylesheet" href="qfc-dark.css">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="bignumber.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
     <script src="paragon1.4.js"></script>
-    <script>
-        "use strict";
-
-        function CalculateParagonSum() {
-            var p1 = $("#p1").val();
-            var p2 = $("#p2").val();
-            localStorage.setItem("p1", p1);
-            localStorage.setItem("p2", p2);
-
-            var xpsum = BigNumber(GetParagonLevelXP(p1)).plus(BigNumber(GetParagonLevelXP(p2)));
-            var psum = GetParagonLevel(xpsum);
-            $("#psum").val(psum);
-        }
-
-        function CalculateParagon() {
-            $("#result").empty();
-            var current = $("#current").val();
-            var desired = $("#desired").val();
-            var xpHrInput = $("#xphr").val();
-            var hrsPerDayInput = $("#hrsperday").val();
-            localStorage.setItem("current", current);
-            localStorage.setItem("desired", desired);
-            localStorage.setItem("xphr", xpHrInput);
-            localStorage.setItem("hrsperday", hrsPerDayInput);
-            var xpHr = BigNumber("1000000000").multipliedBy(BigNumber(xpHrInput));
-            var hrsPerDay = BigNumber($("#hrsperday").val());
-            var xpNeeded = DiffParagon(desired, current);
-            var hours = xpNeeded.dividedBy(xpHr);
-            var days = hours.dividedBy(hrsPerDay);
-
-            var unit = 1;
-            while (unit < 1000000000000000 && xpNeeded.isGreaterThan(unit * 500)) {
-                unit *= 1000;
-            }
-            if (unit === 1) {
-                $("#xpresultlabel").text("XP Needed");
-            } else if (unit === 1000) {
-                $("#xpresultlabel").text("Thousand XP Needed");
-            } else if (unit === 1000000) {
-                $("#xpresultlabel").text("Million XP Needed");
-            } else if (unit === 1000000000) {
-                $("#xpresultlabel").text("Billion XP Needed");
-            } else if (unit === 1000000000000) {
-                $("#xpresultlabel").text("Trillion XP Needed");
-            } else if (unit === 1000000000000000) {
-                $("#xpresultlabel").text("Quadrillion XP Needed");
-            }
-            $("#xpresult").val(xpNeeded.dividedBy(unit).toFixed(3, 4));
-            $("#hoursresult").val(hours.toFixed(1, 4));
-            $("#daysresult").val(days.toFixed(1, 4));
-
-            UpdateChart(days.toNumber());
-        }
-
-        var billion = BigNumber('1000000000');
-        var million = BigNumber('1000000');
-        var thousand = BigNumber('1000');
-        function Human(val) {
-            if (val.isGreaterThan(billion)) {
-                return val.dividedBy(billion).toFixed(2, 4) + ' billion';
-            }
-            if (val.isGreaterThan(million)) {
-                return val.dividedBy(million).toFixed(2, 4) + ' million';
-            }
-            if (val.isGreaterThan(thousand)) {
-                return val.dividedBy(thousand).toFixed(2, 4) + ' thousand';
-            }
-            return val.toFixed(2, 4);
-        }
-
-        function CalculatePools() {
-            var paragon = $("#poolsparagon").val();
-            if (paragon <= 1 || isNaN(paragon)) {
-                paragon = 2;
-            }
-            var level = $("#poolsgrlevel").val();
-            if (level <= 0 || isNaN(paragon)) {
-                level = 1;
-            }
-            var numPlayers = $("#poolsnumplayers").val();
-            if (numPlayers <= 0 || isNaN(paragon)) {
-                numPlayers = 1;
-            } else if (numPlayers > 4) {
-                numPlayers = 4;
-            }
-            var xpFromGear = $("#poolsxpgear").val();
-            if (xpFromGear < 0 || isNaN(xpFromGear)) {
-                xpFromGear = 0;
-            }
-            localStorage.setItem("poolsparagon", paragon);
-            localStorage.setItem("poolsgrlevel", level);
-            localStorage.setItem("poolsnumplayers", numPlayers);
-            localStorage.setItem("poolsxpgear", xpFromGear);
-
-            var xpBonusTotal = (1.0 + xpFromGear / numPlayers * 0.01) * (0.9 + numPlayers * .1);
-            var riftXP = GetRiftXP(level).multipliedBy(xpBonusTotal);
-            var closeXP = GetCloseXP(level);
-            var totalXP = riftXP.plus(closeXP);
-            var poolXP = DiffParagon(paragon, paragon - 1).dividedBy(10);
-            var riftPoolConsumed = riftXP.dividedBy(4);
-            var closePoolConsumed = closeXP.multipliedBy(0.3125);
-            var totalPoolConsumed = riftPoolConsumed.plus(closePoolConsumed);
-            var riftNumPools = riftPoolConsumed.dividedBy(poolXP);
-            var closeNumPools = closePoolConsumed.dividedBy(poolXP);
-            var totalNumPools = totalPoolConsumed.dividedBy(poolXP);
-            $("#baseriftxp").val(Human(riftXP));
-            $("#pooledriftxp").val(Human(riftXP.multipliedBy(1.25)));
-            $("#baseclosexp").val(Human(closeXP));
-            $("#pooledclosexp").val(Human(closeXP.multipliedBy(1.5625)));
-            $("#basetotalxp").val(Human(riftXP.plus(closeXP)));
-            $("#closepooledtotalxp").val(Human(riftXP.plus(closeXP.multipliedBy(1.5625))));
-            $("#allpooledtotalxp").val(Human(riftXP.multipliedBy(1.25).plus(closeXP.multipliedBy(1.5625))));
-            $("#poolsresultrift").val(riftNumPools.toFixed(2, 4));
-            $("#poolsresultclose").val(closeNumPools.toFixed(2, 4));
-            $("#poolsresulttotal").val(totalNumPools.toFixed(2, 4));
-        }
-
-        function GetLocalStorage(key, def) {
-            var val = localStorage.getItem(key);
-            if (val == null) {
-                val = def;
-            }
-            return val;
-        }
-
-        function HaveParagon() {
-            $("#p1").bind('input', CalculateParagonSum);
-            $("#p2").bind('input', CalculateParagonSum);
-            $("#p1").val(GetLocalStorage("p1", "1000"));
-            $("#p2").val(GetLocalStorage("p2", "1000"));
-            CalculateParagonSum();
-
-            $("#current").bind('input', CalculateParagon);
-            $("#desired").bind('input', CalculateParagon);
-            $("#xphr").bind('input', CalculateParagon);
-            $("#hrsperday").bind('input', CalculateParagon);
-
-            $("#current").val(GetLocalStorage("current", "0"));
-            $("#desired").val(GetLocalStorage("desired", "2000"));
-            $("#xphr").val(GetLocalStorage("xphr", "2000"));
-            $("#hrsperday").val(GetLocalStorage("hrsperday", "8"));
-            $("#maindiv").show();
-            CalculateParagon();
-
-            // Pools
-            $("#poolsparagon").bind('input', CalculatePools);
-            $("#poolsgrlevel").bind('input', CalculatePools);
-            $("#poolsnumplayers").bind('input', CalculatePools);
-            $("#poolsxpgear").bind('input', CalculatePools);
-
-            var poolsparagon = localStorage.getItem("poolsparagon");
-            if (poolsparagon == null) {
-                poolsparagon = "2000";
-            }
-            var poolsgrlevel = localStorage.getItem("poolsgrlevel");
-            if (poolsgrlevel == null) {
-                poolsgrlevel = "115";
-            }
-            var poolsnumplayers = localStorage.getItem("poolsnumplayers");
-            if (poolsnumplayers == null) {
-                poolsnumplayers = "4";
-            }
-            var poolsxpgear = localStorage.getItem("poolsxpgear");
-            if (poolsxpgear == null) {
-                poolsxpgear = "0";
-            }
-            $("#poolsparagon").val(poolsparagon);
-            $("#poolsgrlevel").val(poolsgrlevel);
-            $("#poolsnumplayers").val(poolsnumplayers);
-            $("#poolsxpgear").val(poolsxpgear);
-            CalculatePools();
-        }
-        var existingChart;
-        function UpdateChart(numDays) {
-            var days = []
-            var level = []
-            var curXP = GetParagonLevelXP(parseInt($("#current").val()));
-            var xpHr = BigNumber("1000000000").multipliedBy(BigNumber($("#xphr").val()));
-            var hrsPerDay = BigNumber($("#hrsperday").val());
-            var xpDay = xpHr.multipliedBy(hrsPerDay);
-            if (xpDay.isLessThanOrEqualTo(BigNumber("0"))) {
-                return;
-            }
-            numDays = Math.ceil(numDays);
-            var increment = Math.max(1, Math.floor(numDays / 30) + 1)
-            xpDay = xpDay.multipliedBy(BigNumber(increment))
-            for (var i = 0; i <= numDays; i += increment) {
-                days.push(i)
-                level.push(GetParagonLevel(curXP))
-                curXP = curXP.plus(xpDay)
-            }
-
-            var ctx = $("#paragonChart");
-            if (existingChart) {
-                existingChart.destroy()
-            }
-            existingChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: days,
-                    datasets: [{
-                        label: 'Paragon Level',
-                        data: level,
-                        backgroundColor: 'rgb(255, 99, 132)',
-                        borderColor: 'rgb(255, 99, 132)',
-                        fill: false,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    title: {
-                        display: true,
-                        text: 'Paragon Level Over Time'
-                    },
-                    tooltips: {
-                        mode: 'index',
-                        intersect: false,
-                    },
-                    hover: {
-                        mode: 'nearest',
-                        intersect: true
-                    },
-                    scales: {
-                        xAxes: [{
-                            display: true,
-                            scaleLabel: {
-                                display: true,
-                                labelString: 'Day'
-                            }
-                        }],
-                        yAxes: [{
-                            display: true,
-                            scaleLabel: {
-                                display: true,
-                                labelString: 'Paragon Level'
-                            }
-                        }]
-                    }
-                }
-            });
-        }
-
-        $(document).ready(function () {
-            LoadParagon(HaveParagon);
-        });
-    </script>
+    <script src="paragonform.js"></script>
 </head>
 
 <body>
     <div id="maindiv" class="qfc-container" hidden>
+        <button class="toggle-help">Hide Help</button>
         <h3>Add two paragons</h3>
+        <div class="help-description">
+            <p>Paragon is not linear. 1000 paragon + 1000 paragon is not 2000 paragon because you need to add the XP required for 1000 paragon to itself and then calculate what paragon that would be.</p>
+            <p>This is useful to for example figure out what paragon you will be in non-season when the season ends and your season paragon gets rolled into it.</p>
+        </div>
         <table>
             <tr>
                 <td><input id="p1" type="text" /></td>
                 <td width="100">+</td>
                 <td><input id="p2" type="text" /></td>
                 <td width="100">=</td="center">
-                <td><input id="psum" type="text" readonly /></td>
+                    <td><input id="psum" type="text" readonly /></td>
+            </tr>
+        </table>
+
+        <h3>XP per hour</h3>
+        <div class="help-description">
+            <p>Calculates actual XP/hr over a session based on starting and ending paragon.</p>
+            <p>Times are for a 24hr clock (i.e. 22:00 is 10:00pm, aka "military time"). If start time is after end time then the end time is assumed to be the next day. 22:00 - 02:00 is 4 hours.</p>
+        </div>
+        <table>
+            <tr>
+                <td>Starting Paragon</td>
+                <td><input id="xphrstartingparagon" type="text" /></td>
+            </tr>
+            <tr>
+                <td>Ending Paragon</td>
+                <td><input id="xphrendingparagon" type="text" /></td>
+            </tr>
+            <tr>
+                <td>Start Time</td>
+                <td><input id="xphrstarttime" type="text" /></td>
+            </tr>
+            <tr>
+                <td>End Time</td>
+                <td><input id="xphrendtime" type="text" /></td>
+            </tr>
+            <tr>
+                <td>XP per hour</td>
+                <td><input id="xphrresult" type="text" readonly /></td>
+            </tr>
+            <tr>
+                <td>Total XP</td>
+                <td><input id="xphrtotalresult" type="text" readonly /></td>
+            </tr>
+            <tr>
+                <td>Hours</td>
+                <td><input id="xphrtotalhours" type="text" readonly /></td>
             </tr>
         </table>
 
         <h3>Pools</h3>
+        <div class="help-description">
+            <p>Pools of Reflection grant 25% bonus XP from monster kills and Greater Rift Turn-in until they run out.</p>
+            <p>You can have up to 10 pools stored on your character before it caps out, which is equivalent to the amount of XP needed to gain a full level.</p>
+            <p>This means as you level up, you can "hold" more XP as bonus pool XP.</p>
+            <p>However, there is a bug with the XP gained from Greater Rift turn-ins. Instead of receiving a single 25% bonus, the XP gain is compounded again multiplicatively. This means that the bonus XP gained is 56.25% (1.25 x 1.25) rather than 25%.</p>
+            <p>Additionally, the amount of XP consumed by the Greater Rift turn-in is only from the second compounded 25%, which results in only ~55.6% of the bonus XP gained being consumed by the turn-in.</p>
+            <p>Blizzard has been made aware of this bug many times and they have not fixed it, so at this point it's assumed to be "working as intended."</p>
+            <p>The calculator below takes this bug into account.</p>
+            <p>Note that in Season 28 (Feb 24th, 2023), pools of reflection are no longer consumed, which means you can benefit from their bonus XP indefinitely. However, there's a catch: it appears that this mechanic doesn't provide the full benefit of
+                a Greater Rift close at lower paragon levels. After gaining at least one pool, a player is set to the equivalent of 10 pools at all times, but this may not be enough to fully benefit from the bonus XP of a GR close at low paragon. Only
+                once the number of required pools for a GR close is 10 or lower will you gain the full XP benefit from a GR close. This can significantly impact your XP/hr at low paragon, so keep it in mind when planning your leveling strategy. As a rule
+                of thumb, you should gain full XP even from GR 150 at around Paragon 1725.</p>
+        </div>
         <table>
-            <tr><td colspan="2"><h6>--- Inputs ---</h6></td></tr>
+            <tr>
+                <td colspan="2">
+                    <h6>--- Inputs ---</h6>
+                </td>
+            </tr>
             <tr>
                 <td>Current paragon</td>
                 <td><input id="poolsparagon" type="text" /></td>
@@ -300,7 +116,9 @@
                 <td><input id="poolsxpgear" type="text" /></td>
             </tr>
             <tr>
-                <td colspan="2"><h6>--- RESULT ---</h6></td>
+                <td colspan="2">
+                    <h6>--- RESULT ---</h6>
+                </td>
             </tr>
             <tr>
                 <td>Pools For Rift</td>
@@ -314,7 +132,11 @@
                 <td>Total Pools</td>
                 <td><input id="poolsresulttotal" type="text" readonly /></td>
             </tr>
-            <tr><td colspan="2"><h6>--- Raw XP Numbers ---</h6></td></tr>
+            <tr>
+                <td colspan="2">
+                    <h6>--- Raw XP Numbers ---</h6>
+                </td>
+            </tr>
             <tr>
                 <td>Rift [Unpooled]</td>
                 <td>
@@ -359,7 +181,11 @@
             </tr>
         </table>
 
-        <h3>How many days to reach goal?</h3>
+        <h3>Time to Reach Goal</h3>
+        <div class="help-description">
+            <p>This tool allows you to calculate the amount of time required to reach a desired Paragon level based on your current Paragon level, desired Paragon level, XP per hour, and hours played per day. The calculator will display the amount of XP
+                needed to reach your goal, the number of days required, and the number of hours required. Additionally, it will generate a graph of your Paragon level progression over time until the goal is reached.</p>
+        </div>
         <table>
             <tr>
                 <td>Current paragon</td>
